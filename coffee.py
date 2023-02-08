@@ -1,7 +1,7 @@
 from data import MENU, resources, cash
 
 
-# amount_paid = 0
+
 quarters = .25
 dimes = .10
 nickles = .05
@@ -41,7 +41,7 @@ def machine_report():
             print(f"{item.capitalize()}: {resources[item]}g")
         else:
             print(f"{item.capitalize()}: {resources[item]}ml")
-    # print(f"{cash['money'].capitalize()}: {resources[item]}ml")
+
     for money in cash:
         print(f"{money.capitalize()}: ${cash[money]}")
 
@@ -49,55 +49,61 @@ def machine_report():
 def change_calc(order_param, total_coins_param):
     cost = cost_of_product(order_param)
     total_coins_param = round_number(total_coins_param)
-    cash["money"] += cost
-    
+
+
     if total_coins_param >= cost:
+        cash["money"] += cost
         change = round_number(total_coins_param - cost)
         print(f"Total money received is ${total_coins_param}")
         print(f"Here is ${change} in change.")
         print(f"Here is your {order_param}. Enjoy!")
+        resources_used(coffee_param=order_param)
     else:
         print(f"Sorry ${total_coins_param} is not enough money. Money refunded.")
-
+        
 
 def resources_used(coffee_param):
     for coffee in MENU:
-        print(coffee)
-        for resource in resources:
-            # if coffee != 'espresso':
-            print(f"{resource} left: {resources[resource]}")
-            print(f"{coffee_param} used: {MENU[coffee_param]['ingredients'][resource]}")
-            # print(resource)
-            # print(coffee)
-    # water = MENU[coffee]["ingredients"]["water"]
-    # print(water)
-    # return cost
+        if coffee == coffee_param:
+            for resource in resources:
+                if resources[resource] >= MENU[coffee_param]['ingredients'][resource]:
+                    resource_left = resources[resource] - MENU[coffee_param]['ingredients'][resource]
+                    resources[resource] = resource_left
+            return resources[resource]
+        
+
+def resources_check(coffee_param):
+    keep_ordering = False
+    for coffee in MENU:
+        if coffee == coffee_param:
+            for resource in resources:
+                if resources[resource] < MENU[coffee_param]['ingredients'][resource]:
+                    print(f"Sorry there is not enough {resource} left.")
+                    return end_program(keep_ordering_param=keep_ordering)
+                    # return
 
 
-def coffee_machine(order_param):
-    if order_param == 'report':
-        change_calc(order_param,0)
-    else:
-        print("Please insert coins.")
-        total_coins = calculating_money()
-        change_calc(order_param=order_param, total_coins_param=total_coins)
+def end_program(keep_ordering_param):
+    keep_ordering_param = False
+    return keep_ordering_param
 
 
-# print(cash['money'])
-print(resources_used("latte"))
-# espresso = list(MENU.keys())[0]
-# print(MENU["espresso"]["cost"])
-# print(resources["money"])
-# print(cost_of_product("espresso"))
-# machine_report()
+def coffee_machine():
+    order_coffee = True
+    while order_coffee:
+        order = input("What would you like? (espresso/latte/cappuccino): ").lower()
+        if order == 'report':
+            machine_report()
+        elif order == 'off':
+            print("Coffee machine has been turned off. Have a good day!")
+            order_coffee = False
+        else:
+            if resources_check(coffee_param=order) == False:
+                return
+            print("Please insert coins.")
+            total_coins = calculating_money()
+            change_calc(order_param=order, total_coins_param=total_coins)
 
-# keep_ordering = True
-# while keep_ordering:
-#     order = input("What would you like? (espresso/latte/cappuccino): ").lower()
-#     if order == 'off':
-#         print("Coffee machine has been turned off. Have a good day!")
-#         keep_ordering = False
-#     elif order == 'report':
-#         machine_report()
-#     else:
-#         coffee_machine(order_param=order)
+
+
+coffee_machine()
